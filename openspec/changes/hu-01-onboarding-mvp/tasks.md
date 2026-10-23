@@ -11,10 +11,10 @@
 
 ## 2. Flujo frontend
 
-- [ ] 2.1 Configurar un runner de pruebas compatible con Angular 17; verificar que el comando `npm test` ejecuta la suite sin depender del backend ni del mock.
-- [ ] 2.2 Implementar las tres etapas confirmadas: celular/OTP, datos KYC `TEST` y resultado; verificar con pruebas de componentes el progreso, las validaciones y los mensajes accionables.
-- [ ] 2.3 Integrar el frontend con los endpoints propios del backend y mostrar `ACTIVE`, `PENDING` y `REJECTED`; verificar con pruebas de componentes el estado aprobado, pendiente, rechazado y el error recuperable de KYC.
-- [ ] 2.4 Permitir resolver `MANUAL_REVIEW` desde la misma vista de resultado con `ACTIVE` o `REJECTED`; verificar que la acción actualiza el estado visible y no aparece una consola independiente.
+- [x] 2.1 Configurar un runner de pruebas compatible con Angular 17; verificar que el comando `npm test` ejecuta la suite sin depender del backend ni del mock.
+- [x] 2.2 Implementar las tres etapas confirmadas: celular/OTP, datos KYC `TEST` y resultado; verificar con pruebas de componentes el progreso, las validaciones y los mensajes accionables.
+- [x] 2.3 Integrar el frontend con los endpoints propios del backend y mostrar `ACTIVE`, `PENDING` y `REJECTED`; verificar con pruebas de componentes el estado aprobado, pendiente, rechazado y el error recuperable de KYC.
+- [x] 2.4 Permitir resolver `MANUAL_REVIEW` desde la misma vista de resultado con `ACTIVE` o `REJECTED`; verificar que la acción actualiza el estado visible y no aparece una consola independiente.
 - [ ] 2.5 Documentar cómo ejecutar la demo y usar los datos de prueba; verificar `npm run build` y completar una revisión manual responsive en un viewport de smartphone y otro de escritorio.
 
 ## 3. Eventos y medición

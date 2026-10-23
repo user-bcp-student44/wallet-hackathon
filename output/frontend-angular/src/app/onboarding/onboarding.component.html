@@ -1,0 +1,168 @@
+<main class="shell">
+  <section class="card" aria-labelledby="title">
+    <p class="badge">Demo · datos de prueba</p>
+    <h1 id="title">Crea tu wallet</h1>
+
+    <nav aria-label="Progreso del registro">
+      <p class="progress-text">Paso {{ stepIndex() + 1 }} de {{ steps.length }}</p>
+      <ol class="stepper">
+        @for (step of steps; track step.stage; let i = $index) {
+          <li
+            [class.current]="i === stepIndex()"
+            [class.done]="i < stepIndex()"
+            [attr.aria-current]="i === stepIndex() ? 'step' : null"
+          >
+            <span class="dot" aria-hidden="true">{{ i < stepIndex() ? '✓' : i + 1 }}</span>
+            <span class="label">{{ step.label }}</span>
+          </li>
+        }
+      </ol>
+    </nav>
+
+    @if (formError(); as message) {
+      <p class="banner error" role="alert" data-testid="form-error">{{ message }}</p>
+    }
+
+    @switch (stage()) {
+      @case ('otp') {
+        <form [formGroup]="otpForm" (ngSubmit)="verifyOtp()" novalidate data-testid="otp-form">
+          <h2>Verifica tu celular</h2>
+          <p class="hint">
+            Usa un celular de prueba. No enviamos SMS: el código de la demo es
+            <strong>{{ demoOtp }}</strong>.
+          </p>
+
+          <div class="field">
+            <label for="phone">Celular de prueba</label>
+            <input
+              id="phone"
+              type="tel"
+              inputmode="numeric"
+              autocomplete="off"
+              maxlength="9"
+              formControlName="phone"
+              [attr.aria-invalid]="otpForm.controls.phone.touched && otpForm.controls.phone.invalid"
+              aria-describedby="phone-error"
+            />
+            <p id="phone-error" class="field-error" role="alert">
+              @if (otpForm.controls.phone.touched && otpForm.controls.phone.errors) {
+                @if (otpForm.controls.phone.errors['required']) {
+                  Ingresa tu celular de prueba de 9 dígitos.
+                } @else {
+                  El celular debe tener 9 dígitos y empezar con 9.
+                }
+              }
+            </p>
+          </div>
+
+          <div class="field">
+            <label for="code">Código de verificación</label>
+            <input
+              id="code"
+              type="text"
+              inputmode="numeric"
+              autocomplete="off"
+              maxlength="6"
+              formControlName="code"
+              [attr.aria-invalid]="otpForm.controls.code.touched && otpForm.controls.code.invalid"
+              aria-describedby="code-error"
+            />
+            <p id="code-error" class="field-error" role="alert">
+              @if (otpForm.controls.code.touched && otpForm.controls.code.errors) {
+                Ingresa el código de 6 dígitos.
+              }
+            </p>
+          </div>
+
+          <button type="submit" class="primary" [disabled]="busy()">
+            {{ busy() ? 'Verificando…' : 'Verificar y continuar' }}
+          </button>
+        </form>
+      }
+
+      @case ('kyc') {
+        <form [formGroup]="kycForm" (ngSubmit)="submitKyc()" novalidate data-testid="kyc-form">
+          <h2>Datos de verificación</h2>
+          <p class="hint">Usa solo datos de prueba. No ingreses documentos reales.</p>
+
+          <div class="field">
+            <label for="docType">Tipo de documento</label>
+            <input id="docType" type="text" [value]="documentType" readonly />
+          </div>
+
+          <div class="field">
+            <label for="document">Documento de prueba</label>
+            <input
+              id="document"
+              type="text"
+              autocomplete="off"
+              autocapitalize="characters"
+              placeholder="TEST-0001"
+              formControlName="document"
+              [attr.aria-invalid]="kycForm.controls.document.touched && kycForm.controls.document.invalid"
+              aria-describedby="document-error"
+            />
+            <p id="document-error" class="field-error" role="alert">
+              @if (kycForm.controls.document.touched && kycForm.controls.document.errors) {
+                @if (kycForm.controls.document.errors['required']) {
+                  Ingresa el documento de prueba.
+                } @else {
+                  Usa un documento de prueba que empiece con TEST-, por ejemplo TEST-0001.
+                }
+              }
+            </p>
+          </div>
+
+          <button type="submit" class="primary" [disabled]="busy()">
+            {{ busy() ? 'Enviando…' : 'Enviar datos' }}
+          </button>
+        </form>
+      }
+
+      @case ('result') {
+        <section class="result" aria-live="polite" data-testid="result">
+          @switch (result()) {
+            @case ('ACTIVE') {
+              <h2 class="ok">Tu wallet está activa</h2>
+              <p>La verificación fue aprobada. Estado: <strong>ACTIVE</strong>.</p>
+            }
+            @case ('PENDING') {
+              <h2 class="wait">Tu verificación está en revisión</h2>
+              <p>
+                Tu wallet todavía <strong>no está activa</strong>. Estado: <strong>PENDING</strong>.
+              </p>
+              <div class="demo-panel">
+                <p class="hint">Demo: resuelve la revisión manual desde aquí.</p>
+                <div class="actions">
+                  <button type="button" class="primary" [disabled]="busy()" (click)="resolveManualReview('ACTIVE')">
+                    Aprobar (demo)
+                  </button>
+                  <button type="button" class="secondary" [disabled]="busy()" (click)="resolveManualReview('REJECTED')">
+                    Rechazar (demo)
+                  </button>
+                </div>
+              </div>
+            }
+            @case ('REJECTED') {
+              <h2 class="bad">No pudimos activar tu wallet</h2>
+              <p>La verificación fue rechazada. Estado: <strong>REJECTED</strong>.</p>
+            }
+            @case ('UNAVAILABLE') {
+              <h2 class="bad">No pudimos completar la verificación</h2>
+              <p>Tu wallet no está activa. Puedes intentarlo de nuevo.</p>
+              <button type="button" class="primary" [disabled]="busy()" (click)="retryKyc()">
+                {{ busy() ? 'Reintentando…' : 'Reintentar verificación' }}
+              </button>
+            }
+            @case ('UNKNOWN') {
+              <h2 class="bad">No pudimos confirmar el envío</h2>
+              <p>
+                No sabemos si tus datos llegaron. Para evitar duplicados, no repitas el envío; tu wallet no está activa.
+              </p>
+            }
+          }
+        </section>
+      }
+    }
+  </section>
+</main>
